@@ -73,7 +73,42 @@ export default function NewJournalEntryPage() {
   const totalDebitMinor = lines.reduce((sum, l) => sum + parseMoneyToMinor(l.debitStr), 0);
   const totalCreditMinor = lines.reduce((sum, l) => sum + parseMoneyToMinor(l.creditStr), 0);
   const differenceMinor = totalDebitMinor - totalCreditMinor;
+  const isZero = totalDebitMinor === 0 && totalCreditMinor === 0;
+  const activeLines = lines.filter(l => (parseMoneyToMinor(l.debitStr) > 0 || parseMoneyToMinor(l.creditStr) > 0));
+  const allAccountsSelected = activeLines.length >= 2 && activeLines.every(l => Boolean(l.accountId));
   const isBalanced = differenceMinor === 0 && totalDebitMinor > 0;
+  const canPost = isBalanced && allAccountsSelected;
+
+  const handleAutoBalance = () => {
+    if (differenceMinor === 0) return;
+    const absDiff = Math.abs(differenceMinor);
+    const diffStr = (absDiff / 100).toFixed(2);
+    const needDebit = totalDebitMinor < totalCreditMinor;
+
+    const emptyLineIdx = lines.findIndex(l => !l.debitStr && !l.creditStr);
+    if (emptyLineIdx !== -1) {
+      setLines(prev => {
+        const copy = [...prev];
+        copy[emptyLineIdx] = {
+          ...copy[emptyLineIdx],
+          debitStr: needDebit ? diffStr : '',
+          creditStr: needDebit ? '' : diffStr,
+        };
+        return copy;
+      });
+    } else {
+      setLines(prev => [
+        ...prev,
+        {
+          id: Math.random().toString(),
+          accountId: '',
+          debitStr: needDebit ? diffStr : '',
+          creditStr: needDebit ? '' : diffStr,
+          description: '',
+        },
+      ]);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +186,7 @@ export default function NewJournalEntryPage() {
         totalDebitMinor={totalDebitMinor}
         totalCreditMinor={totalCreditMinor}
         currency={company.currency}
+        onAutoBalance={handleAutoBalance}
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -295,15 +331,21 @@ export default function NewJournalEntryPage() {
 
             <button
               type="submit"
-              disabled={!isBalanced || posting}
+              disabled={!canPost || posting}
               className={`btn-brutal px-8 py-3 text-sm flex items-center gap-2 ${
-                isBalanced
+                canPost
                   ? 'bg-[#00E065] text-black hover:bg-[#00c95a]'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
               <Send className="w-4 h-4" />
-              {posting ? 'COMMITTING TRANSACTION...' : isBalanced ? 'POST ENTRY TO LEDGER' : 'BALANCE TO POST'}
+              {posting
+                ? 'COMMITTING TRANSACTION...'
+                : !isBalanced
+                ? 'BALANCE TO POST (DIFF: ' + company.currency + ' ' + (Math.abs(differenceMinor) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 }) + ')'
+                : !allAccountsSelected
+                ? 'SELECT ACCOUNT FOR LINE 2'
+                : 'POST ENTRY TO LEDGER'}
             </button>
           </div>
         </div>

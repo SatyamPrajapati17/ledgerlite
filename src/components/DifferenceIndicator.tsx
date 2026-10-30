@@ -8,12 +8,14 @@ interface DifferenceIndicatorProps {
   totalDebitMinor: number;
   totalCreditMinor: number;
   currency?: string;
+  onAutoBalance?: () => void;
 }
 
 export const DifferenceIndicator: React.FC<DifferenceIndicatorProps> = ({
   totalDebitMinor,
   totalCreditMinor,
   currency = 'INR',
+  onAutoBalance,
 }) => {
   const differenceMinor = totalDebitMinor - totalCreditMinor;
   const isBalanced = differenceMinor === 0 && totalDebitMinor > 0;
@@ -70,16 +72,27 @@ export const DifferenceIndicator: React.FC<DifferenceIndicatorProps> = ({
         </div>
       </div>
 
-      {/* Helpful explanation badge */}
-      <div className="mt-3 text-xs font-mono font-semibold flex items-center justify-between border-t-2 border-black/10 pt-2 text-black/80">
-        <span>
-          {isBalanced
-            ? '✓ Perfect zero difference! Entry is ready to commit in atomic TablesDB transaction.'
-            : isZero
-            ? 'Add at least two lines with account, and positive debit/credit amounts.'
-            : `Debits must equal Credits to commit. Difference to resolve: ${currency} ${formatMoneyWithoutSymbol(Math.abs(differenceMinor))}`}
-        </span>
-        <span className="font-bold uppercase tracking-wider text-[10px] px-1.5 py-0.5 bg-black text-yellow-400 border border-black">
+      {/* Helpful explanation badge & Auto-Balance */}
+      <div className="mt-3 text-xs font-mono font-semibold flex flex-wrap items-center justify-between gap-2 border-t-2 border-black/10 pt-2 text-black/80">
+        <div className="flex items-center gap-2">
+          <span>
+            {isBalanced
+              ? '✓ Perfect zero difference! Entry is ready to commit in atomic TablesDB transaction.'
+              : isZero
+              ? 'Add at least two lines with account, and positive debit/credit amounts.'
+              : `Debits must equal Credits to commit. Difference to resolve: ${currency} ${formatMoneyWithoutSymbol(Math.abs(differenceMinor))}`}
+          </span>
+          {onAutoBalance && !isBalanced && !isZero && (
+            <button
+              type="button"
+              onClick={onAutoBalance}
+              className="px-2 py-0.5 bg-[#FFE500] hover:bg-yellow-300 text-black border-2 border-black font-mono font-black text-[11px] shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5"
+            >
+              ⚡ AUTO-BALANCE (FILL {currency} {formatMoneyWithoutSymbol(Math.abs(differenceMinor))})
+            </button>
+          )}
+        </div>
+        <span className="font-bold uppercase tracking-wider text-[10px] px-1.5 py-0.5 bg-black text-yellow-400 border border-black shrink-0">
           IMMUTABLE LEDGER RULE
         </span>
       </div>
