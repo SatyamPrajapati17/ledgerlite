@@ -1,0 +1,206 @@
+{
+  "projectId": "6ae4f8d4000fe676e1aa",
+  "projectName": "Ledgerlite",
+  "databases": [
+    {
+      "$id": "6ae4fc0f00271732d094",
+      "name": "Production TablesDB",
+      "enabled": true
+    }
+  ],
+  "tables": [
+    {
+      "$id": "companies",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "companies",
+      "enabled": true,
+      "columns": [
+        { "key": "name", "type": "varchar", "size": 120, "required": true },
+        { "key": "legalName", "type": "varchar", "size": 160, "required": false },
+        { "key": "currency", "type": "varchar", "size": 3, "required": true, "default": "INR" },
+        { "key": "fiscalYearStartMonth", "type": "integer", "required": true, "default": 1 },
+        { "key": "taxLabel", "type": "varchar", "size": 20, "required": false, "default": "GST" },
+        { "key": "ownerId", "type": "varchar", "size": 36, "required": true }
+      ],
+      "indexes": []
+    },
+    {
+      "$id": "accounts",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "accounts",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "code", "type": "varchar", "size": 10, "required": true },
+        { "key": "name", "type": "varchar", "size": 120, "required": true },
+        { "key": "type", "type": "enum", "elements": ["asset", "liability", "equity", "income", "expense"], "required": true },
+        { "key": "normalSide", "type": "enum", "elements": ["debit", "credit"], "required": true },
+        { "key": "systemKey", "type": "varchar", "size": 30, "required": false },
+        { "key": "balanceMinor", "type": "bigint", "required": true, "default": 0 },
+        { "key": "isActive", "type": "boolean", "required": true, "default": true }
+      ],
+      "indexes": [
+        { "key": "idx_company_code", "type": "unique", "attributes": ["companyId", "code"] },
+        { "key": "idx_company_type", "type": "key", "attributes": ["companyId", "type"] },
+        { "key": "idx_name_fulltext", "type": "fulltext", "attributes": ["name"] }
+      ]
+    },
+    {
+      "$id": "journalEntries",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "journalEntries",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "entryNo", "type": "bigint", "required": true },
+        { "key": "entryDate", "type": "datetime", "required": true },
+        { "key": "memo", "type": "varchar", "size": 500, "required": false },
+        { "key": "source", "type": "enum", "elements": ["manual", "invoice", "payment", "bill", "reversal", "seed"], "required": true },
+        { "key": "sourceId", "type": "varchar", "size": 36, "required": false },
+        { "key": "reversalOfId", "type": "varchar", "size": 36, "required": false },
+        { "key": "totalMinor", "type": "bigint", "required": true },
+        { "key": "createdBy", "type": "varchar", "size": 36, "required": true }
+      ],
+      "indexes": [
+        { "key": "idx_company_entryNo", "type": "unique", "attributes": ["companyId", "entryNo"] },
+        { "key": "idx_company_entryDate", "type": "key", "attributes": ["companyId", "entryDate"] },
+        { "key": "idx_company_reversalOfId", "type": "key", "attributes": ["companyId", "reversalOfId"] }
+      ]
+    },
+    {
+      "$id": "journalLines",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "journalLines",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "entryId", "type": "varchar", "size": 36, "required": true },
+        { "key": "lineNo", "type": "integer", "required": true },
+        { "key": "entryDate", "type": "datetime", "required": true },
+        { "key": "accountId", "type": "varchar", "size": 36, "required": true },
+        { "key": "debitMinor", "type": "bigint", "required": true, "default": 0 },
+        { "key": "creditMinor", "type": "bigint", "required": true, "default": 0 },
+        { "key": "description", "type": "varchar", "size": 200, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_entryId", "type": "key", "attributes": ["entryId"] },
+        { "key": "idx_company_account_date", "type": "key", "attributes": ["companyId", "accountId", "entryDate"] },
+        { "key": "idx_company_date", "type": "key", "attributes": ["companyId", "entryDate"] }
+      ]
+    },
+    {
+      "$id": "contacts",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "contacts",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "kind", "type": "enum", "elements": ["customer", "vendor"], "required": true },
+        { "key": "name", "type": "varchar", "size": 120, "required": true },
+        { "key": "email", "type": "email", "required": false },
+        { "key": "phone", "type": "varchar", "size": 30, "required": false },
+        { "key": "taxId", "type": "varchar", "size": 30, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_company_kind", "type": "key", "attributes": ["companyId", "kind"] },
+        { "key": "idx_name_fulltext", "type": "fulltext", "attributes": ["name"] }
+      ]
+    },
+    {
+      "$id": "invoices",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "invoices",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "kind", "type": "enum", "elements": ["sales", "purchase"], "required": true },
+        { "key": "number", "type": "varchar", "size": 30, "required": true },
+        { "key": "contactId", "type": "varchar", "size": 36, "required": true },
+        { "key": "issueDate", "type": "datetime", "required": true },
+        { "key": "dueDate", "type": "datetime", "required": true },
+        { "key": "status", "type": "enum", "elements": ["draft", "sent", "partial", "paid", "void"], "required": true },
+        { "key": "subtotalMinor", "type": "bigint", "required": true },
+        { "key": "taxMinor", "type": "bigint", "required": true },
+        { "key": "totalMinor", "type": "bigint", "required": true },
+        { "key": "paidMinor", "type": "bigint", "required": true, "default": 0 },
+        { "key": "entryId", "type": "varchar", "size": 36, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_company_kind_number", "type": "unique", "attributes": ["companyId", "kind", "number"] },
+        { "key": "idx_company_status", "type": "key", "attributes": ["companyId", "status"] },
+        { "key": "idx_company_issueDate", "type": "key", "attributes": ["companyId", "issueDate"] }
+      ]
+    },
+    {
+      "$id": "invoiceItems",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "invoiceItems",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "invoiceId", "type": "varchar", "size": 36, "required": true },
+        { "key": "description", "type": "varchar", "size": 200, "required": true },
+        { "key": "quantity", "type": "float", "required": true },
+        { "key": "unitPriceMinor", "type": "bigint", "required": true },
+        { "key": "taxRateBp", "type": "integer", "required": true },
+        { "key": "lineSubtotalMinor", "type": "bigint", "required": true },
+        { "key": "accountId", "type": "varchar", "size": 36, "required": true }
+      ],
+      "indexes": [
+        { "key": "idx_invoiceId", "type": "key", "attributes": ["invoiceId"] }
+      ]
+    },
+    {
+      "$id": "payments",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "payments",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "invoiceId", "type": "varchar", "size": 36, "required": true },
+        { "key": "paymentDate", "type": "datetime", "required": true },
+        { "key": "amountMinor", "type": "bigint", "required": true },
+        { "key": "method", "type": "enum", "elements": ["cash", "bank", "upi", "card", "other"], "required": true },
+        { "key": "cashAccountId", "type": "varchar", "size": 36, "required": true },
+        { "key": "entryId", "type": "varchar", "size": 36, "required": true },
+        { "key": "reference", "type": "varchar", "size": 80, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_payment_invoiceId", "type": "key", "attributes": ["invoiceId"] },
+        { "key": "idx_payment_company_date", "type": "key", "attributes": ["companyId", "paymentDate"] }
+      ]
+    },
+    {
+      "$id": "counters",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "counters",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "counterKey", "type": "varchar", "size": 30, "required": true },
+        { "key": "value", "type": "bigint", "required": true, "default": 0 }
+      ],
+      "indexes": [
+        { "key": "idx_company_counterKey", "type": "unique", "attributes": ["companyId", "counterKey"] }
+      ]
+    },
+    {
+      "$id": "auditLog",
+      "databaseId": "6ae4fc0f00271732d094",
+      "name": "auditLog",
+      "enabled": true,
+      "columns": [
+        { "key": "companyId", "type": "varchar", "size": 36, "required": true },
+        { "key": "actorId", "type": "varchar", "size": 36, "required": true },
+        { "key": "actorName", "type": "varchar", "size": 80, "required": true },
+        { "key": "action", "type": "varchar", "size": 40, "required": true },
+        { "key": "entityType", "type": "varchar", "size": 30, "required": true },
+        { "key": "entityId", "type": "varchar", "size": 36, "required": true },
+        { "key": "summary", "type": "varchar", "size": 300, "required": true }
+      ],
+      "indexes": [
+        { "key": "idx_audit_companyId", "type": "key", "attributes": ["companyId"] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=JetBrains+Mono:wght@400;500;700;800&family=Playfair+Display:ital,wght@1,900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-poppins: 'Poppins', sans-serif;
+  --font-italiana: 'Italiana', 'Playfair Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font-poppins);
+  background-color: #FFFDF5;
+  color: #0F0F0F;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Neo-Brutalist Selection */
+::selection {
+  background-color: #FFE500;
+  color: #000000;
+}
+
+/* Custom Neo-Brutalist Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFDF5;
+  border-left: 2px solid #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000000;
+  border: 2px solid #FFFDF5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF2A2A;
+}
+
+/* Tabular numerals for financial accuracy */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Brutalist Button Utility Classes */
+.btn-brutal {
+  position: relative;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-brutal:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.btn-brutal:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.btn-brutal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+/* Brutalist Card Utility Classes */
+.card-brutal {
+  background: #FFFFFF;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px #000000;
+}
+
+.card-brutal-sm {
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+}
